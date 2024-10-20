@@ -332,33 +332,42 @@ const AdminDashboard = () => {
                               <ChartBar />
                             </Button>
                           </DialogTrigger>
-                          <DialogContent>
-                            <DialogHeader>
-                              <DialogTitle>{row.original.username}</DialogTitle>
-                              <DialogDescription>
-                                {loadingStats ? (
-                                  <span className="text-black dark:text-white">
-                                    Loading ...
-                                  </span>
-                                ) : stats.length > 0 ? (
-                                  <ul className="space-y-2">
-                                    {stats.map((stat, index) => (
-                                      <li key={index}>
-                                        <span>{format(stat.date, 'PPP')}</span>
-                                        <img
-                                          src={stat.imgUrl}
-                                          alt={`Stat ${index + 1}`}
-                                          className="w-[200px] h-auto aspect-square"
-                                          loading="lazy"
-                                        />
-                                      </li>
-                                    ))}
-                                  </ul>
-                                ) : (
-                                  <p>No stats available.</p>
-                                )}
-                              </DialogDescription>
-                            </DialogHeader>
+                          <DialogContent className="max-w-full h-screen p-0 md:p-6">
+                            <div className="h-full overflow-y-auto">
+                              <DialogHeader className="p-6 md:p-0">
+                                <DialogTitle className="text-xl md:text-2xl">
+                                  {row.original.username}
+                                </DialogTitle>
+                                <DialogDescription className="mt-4">
+                                  {loadingStats ? (
+                                    <span className="text-black dark:text-white">
+                                      Loading ...
+                                    </span>
+                                  ) : stats.length > 0 ? (
+                                    <ul className="space-y-6 p-6 md:p-0">
+                                      {stats.map((stat, index) => (
+                                        <li
+                                          key={index}
+                                          className="flex flex-col space-y-2"
+                                        >
+                                          <span className="font-medium">
+                                            {format(stat.date, 'PPP')}
+                                          </span>
+                                          <img
+                                            src={stat.imgUrl}
+                                            alt={`Stat ${index + 1}`}
+                                            className="w-full max-w-2xl h-auto aspect-square object-contain"
+                                            loading="lazy"
+                                          />
+                                        </li>
+                                      ))}
+                                    </ul>
+                                  ) : (
+                                    <p>No stats available.</p>
+                                  )}
+                                </DialogDescription>
+                              </DialogHeader>
+                            </div>
                           </DialogContent>
                         </Dialog>
                       </TableCell>

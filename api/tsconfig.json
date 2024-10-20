@@ -1,6 +1,5 @@
 {
   "compilerOptions": {
-    "incremental": true,
     "target": "ES2020",
     "module": "CommonJS",
     "rootDir": "./src",
@@ -10,10 +9,7 @@
     "forceConsistentCasingInFileNames": true,
     "strict": true,
     "skipLibCheck": true,
-    "types": ["node", "express"],
-    "typeRoots": ["./node_modules/@types"],
-    "lib": ["ES2020"],
-    "sourceMap": true
+    "typeRoots": ["./node_modules/@types", "./src/types"]
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules"]

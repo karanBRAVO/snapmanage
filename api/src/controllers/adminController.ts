@@ -2,41 +2,54 @@ import { Response, Request } from "express";
 import { AdminModel } from "../models/adminModel";
 import { compareSync, hashSync } from "bcrypt";
 import { UserModel } from "../models/userModel";
+import JWT from "jsonwebtoken";
+import mongoose from "mongoose";
 
 interface IAdminData {
   username: string;
   password: string;
 }
 
+export interface JWTPayload {
+  _id: string;
+}
+
 export const adminLoginHandler = async (req: Request, res: Response) => {
   try {
     const { username, password } = req.body as IAdminData;
+    console.log({ username, password });
     if (!username) {
-      res.json({ message: "Username not provided." }).status(401);
-      return;
+      return res.status(401).json({ message: "Username not provided." });
     }
     if (!password) {
-      res.json({ message: "Password not provided." }).status(401);
-      return;
+      return res.status(401).json({ message: "Password not provided." });
     }
 
     const existingAdmin = await AdminModel.findOne({ username: username });
     if (existingAdmin === null) {
-      res.json({ message: "Admin not found | Signup required." }).json(404);
-      return;
+      return res
+        .status(404)
+        .json({ message: "Admin not found | Signup required." });
     }
 
     if (!compareSync(password, existingAdmin.password)) {
-      res.json({ message: "Incorrect password" }).json(401);
-      return;
+      return res.status(401).json({ message: "Incorrect password" });
     }
 
-    res.json({ message: "Login successful" }).status(200);
-    return;
+    const jwtSecret = process.env.JWT_SECRET;
+    if (!jwtSecret) {
+      throw new Error("Invalid JWT secret");
+    }
+
+    const token = JWT.sign({ _id: existingAdmin._id }, jwtSecret);
+
+    return res.status(200).json({
+      message: "Login successful",
+      data: { username, token },
+    });
   } catch (err: any) {
     console.log(err);
-    res.json({ message: "Internal Server Error" }).status(500);
-    return;
+    return res.status(500).json({ message: "Internal Server Error" });
   }
 };
 
@@ -44,46 +57,55 @@ export const adminSignupHandler = async (req: Request, res: Response) => {
   try {
     const { username, password } = req.body as IAdminData;
     if (!username) {
-      res.json({ message: "Username not provided." }).status(401);
-      return;
+      return res.status(401).json({ message: "Username not provided." });
     }
     if (!password) {
-      res.json({ message: "Password not provided." }).status(401);
-      return;
+      return res.status(401).json({ message: "Password not provided." });
     }
 
     const existingAdmin = await AdminModel.find({});
     if (existingAdmin && existingAdmin.length > 0) {
-      res.json({ message: "Admin already exists" }).json(404);
-      return;
+      return res.status(404).json({ message: "Admin already exists" });
     }
 
     const newAdmin = new AdminModel({
       username,
-      password: hashSync(password, 100),
+      password: hashSync(password, 10),
     });
     await newAdmin.save();
 
-    res.json({ message: "Signup successful" }).status(200);
-    return;
+    return res.status(200).json({ message: "Signup successful" });
   } catch (err: any) {
     console.log(err);
-    res.json({ message: "Internal Server Error" }).status(500);
-    return;
+    return res.status(500).json({ message: "Internal Server Error" });
   }
 };
 
 export const getUserDetails = async (req: Request, res: Response) => {
   try {
+    if (!req.user) {
+      return res.status(404).json({ message: "Invalid request" });
+    }
+
+    const { _id: adminId } = req.user;
+    if (!adminId) {
+      return res.status(404).json({ message: "Token not verified" });
+    }
+
+    const existingAdmin = await AdminModel.findOne({
+      _id: new mongoose.Types.ObjectId(adminId),
+    });
+    if (!existingAdmin) {
+      return res.status(404).json({ message: "Admin do not exists" });
+    }
+
     const users = await UserModel.find({}).select(
       "_id name fatherName phoneNumber email dob username"
     );
 
-    res.json({ message: "Users details sent", data: users }).status(200);
-    return;
+    return res.status(200).json({ message: "Users details sent", data: users });
   } catch (err: any) {
     console.log(err);
-    res.json({ message: "Internal Server Error" }).status(500);
-    return;
+    return res.status(500).json({ message: "Internal Server Error" });
   }
 };

@@ -4,11 +4,21 @@ import {
   userLoginHandler,
   userSignupHandler,
 } from "../controllers/userController";
+import { verifyToken } from "../middlewares/authMiddleware";
+import multer from "multer";
 
 const router = Router();
 
-router.post("/login", userLoginHandler);
-router.post("/signup", userSignupHandler);
-router.post("/user-details", uploadImage);
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
+
+router.post("/login", userLoginHandler as any);
+router.post("/signup", userSignupHandler as any);
+router.post(
+  "/upload-image",
+  verifyToken,
+  upload.single("image"),
+  uploadImage as any
+);
 
 export default router;

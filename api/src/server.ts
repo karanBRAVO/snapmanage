@@ -3,6 +3,8 @@ dotenv.config();
 import express from "express";
 import cors from "cors";
 import { connectToDb } from "./db/conn";
+import AdminRouter from "./routes/adminRoute";
+import UserRouter from "./routes/userRoute";
 
 // create the express app
 const app = express();
@@ -20,6 +22,14 @@ app.use(express.urlencoded({ extended: true }));
 
 // port configurations
 const PORT: number = Number(process.env.PORT) || 8000;
+
+app.get("/", (req, res) => {
+  res.json({ message: "Hello World!" }).status(200);
+  return;
+});
+
+app.use("/api/admin", AdminRouter);
+app.use("/api/user", UserRouter);
 
 const startServer = async () => {
   try {

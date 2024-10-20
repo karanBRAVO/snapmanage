@@ -14,6 +14,7 @@ import {
   useReactTable,
 } from '@tanstack/react-table';
 import { ChevronDown } from 'lucide-react';
+import { ChartBar } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -22,6 +23,14 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import {
   Table,
@@ -81,11 +90,14 @@ export const columns: ColumnDef<Payment>[] = [
   {
     accessorKey: 'dob',
     header: 'Date of Birth',
-    cell: ({ row }) => (
-      <div className="capitalize">{format(row.getValue('dob'), 'PPP')}</div>
-    ),
+    cell: ({ row }) => <div>{format(row.getValue('dob'), 'PPP')}</div>,
   },
 ];
+
+export interface IStats {
+  imgUrl: string;
+  date: string;
+}
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -98,7 +110,9 @@ const AdminDashboard = () => {
     React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
   const [loading, setLoading] = React.useState(false);
+  const [loadingStats, setLoadingStats] = React.useState(false);
   const [data, setData] = React.useState<Payment[]>([]);
+  const [stats, setStats] = React.useState<IStats[]>([]);
 
   const table = useReactTable({
     data,
@@ -154,6 +168,47 @@ const AdminDashboard = () => {
       console.log(err);
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function getStats(userId: string) {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      toast({
+        title: 'Error',
+        description: (
+          <div>
+            <span>Not logged in.</span>
+          </div>
+        ),
+      });
+
+      navigate('/admin/login');
+      return;
+    }
+
+    if (!userId) return;
+
+    setLoadingStats(true);
+
+    try {
+      const response = await axios.get(
+        `${import.meta.env.VITE_API_URL}/api/admin/user-stats?userId=${userId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      console.log(response.data);
+      if (response.status === 200) {
+        setStats(response.data.data);
+      }
+    } catch (err: any) {
+      console.log(err);
+    } finally {
+      setLoadingStats(false);
     }
   }
 
@@ -264,6 +319,49 @@ const AdminDashboard = () => {
                           )}
                         </TableCell>
                       ))}
+                      <TableCell>
+                        <Dialog>
+                          <DialogTrigger>
+                            <Button
+                              onClick={() => {
+                                getStats(row.original._id);
+                              }}
+                              variant={'outline'}
+                              size={'icon'}
+                            >
+                              <ChartBar />
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent>
+                            <DialogHeader>
+                              <DialogTitle>{row.original.username}</DialogTitle>
+                              <DialogDescription>
+                                {loadingStats ? (
+                                  <span className="text-black dark:text-white">
+                                    Loading ...
+                                  </span>
+                                ) : stats.length > 0 ? (
+                                  <ul className="space-y-2">
+                                    {stats.map((stat, index) => (
+                                      <li key={index}>
+                                        <span>{format(stat.date, 'PPP')}</span>
+                                        <img
+                                          src={stat.imgUrl}
+                                          alt={`Stat ${index + 1}`}
+                                          className="w-[200px] h-auto aspect-square"
+                                          loading="lazy"
+                                        />
+                                      </li>
+                                    ))}
+                                  </ul>
+                                ) : (
+                                  <p>No stats available.</p>
+                                )}
+                              </DialogDescription>
+                            </DialogHeader>
+                          </DialogContent>
+                        </Dialog>
+                      </TableCell>
                     </TableRow>
                   ))
                 ) : (

@@ -4,6 +4,7 @@ import { compareSync, hashSync } from "bcrypt";
 import { UserModel } from "../models/userModel";
 import JWT from "jsonwebtoken";
 import mongoose from "mongoose";
+import { StatusModel } from "../models/statusModel";
 
 interface IAdminData {
   username: string;
@@ -104,6 +105,45 @@ export const getUserDetails = async (req: Request, res: Response) => {
     );
 
     return res.status(200).json({ message: "Users details sent", data: users });
+  } catch (err: any) {
+    console.log(err);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+export const getUserStats = async (req: Request, res: Response) => {
+  try {
+    if (!req.user) {
+      return res.status(404).json({ message: "Invalid request" });
+    }
+
+    const { _id: adminId } = req.user;
+    if (!adminId) {
+      return res.status(404).json({ message: "Token not verified" });
+    }
+
+    const existingAdmin = await AdminModel.findOne({
+      _id: new mongoose.Types.ObjectId(adminId),
+    });
+    if (!existingAdmin) {
+      return res.status(404).json({ message: "Admin do not exists" });
+    }
+
+    const { userId } = req.query as { userId: string };
+    if (!userId) {
+      return res.status(401).json({ message: "User id not provided" });
+    }
+
+    const userDetails = await StatusModel.findOne({
+      userId: new mongoose.Types.ObjectId(userId),
+    });
+    if (!userDetails) {
+      return res.status(401).json({ message: "User not found" });
+    }
+
+    return res
+      .status(200)
+      .json({ message: "User stats sent", data: userDetails.stats });
   } catch (err: any) {
     console.log(err);
     return res.status(500).json({ message: "Internal Server Error" });

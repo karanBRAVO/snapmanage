@@ -2,21 +2,50 @@ import AdminAuth, { AdminAuthFormSchema } from '@/components/admin-auth';
 import { toast } from '@/components/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { z } from 'zod';
+import axios from 'axios';
 
 const AdminLogin = () => {
   const navigate = useNavigate();
 
-  function onSubmit(data: z.infer<typeof AdminAuthFormSchema>) {
+  async function onSubmit(data: z.infer<typeof AdminAuthFormSchema>) {
     console.log(data);
-    toast({
-      title: 'Success',
-      description: (
-        <div>
-          <span>Logged in successfully.</span>
-        </div>
-      ),
-    });
-    navigate('/admin/dashboard');
+    try {
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_URL}/api/admin/login`,
+        {
+          username: data.username,
+          password: data.password,
+        }
+      );
+
+      if (response.status === 200) {
+        toast({
+          title: 'Success',
+          description: (
+            <div>
+              <span>Login successfull.</span>
+            </div>
+          ),
+        });
+        const token = response.data.data.token;
+        const userName = response.data.data.username;
+        localStorage.setItem('token', token);
+        localStorage.setItem('name', userName);
+        navigate('/admin/dashboard');
+      }
+    } catch (err: any) {
+      console.log(err);
+      if (err.response) {
+        toast({
+          title: 'Error',
+          description: (
+            <div>
+              <span>{err.response.data.message}</span>
+            </div>
+          ),
+        });
+      }
+    }
   }
 
   return (

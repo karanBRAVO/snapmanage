@@ -10,25 +10,86 @@ import Navbar from '@/components/navbar';
 import AdminDashboard from '@/pages/admin/AdminDashboard';
 import UserUpload from '@/pages/user/UserUpload';
 import Footer from '@/components/footer';
+import ProtectedRoute from '@/pages/ProtectedRoute';
 
 const App = () => {
   return (
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
       <Toaster />
       <Navbar />
-      <Routes>
-        <Route path="/" element Component={Home} />
+      <main className="pb-10">
+        <Routes>
+          <Route path="/" element Component={Home} />
 
-        {/* Admin */}
-        <Route path="/admin/login" element Component={AdminLogin} />
-        <Route path="/admin/signup" element Component={AdminSignup} />
-        <Route path="/admin/dashboard" element Component={AdminDashboard} />
+          {/* Admin */}
+          <Route
+            path="/admin/login"
+            element={
+              <ProtectedRoute
+                isAuthPath
+                authPath="/admin/login"
+                moveTo="/admin/dashboard"
+              >
+                <AdminLogin />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/signup"
+            element={
+              <ProtectedRoute
+                isAuthPath
+                authPath="/admin/signup"
+                moveTo="/admin/dashboard"
+              >
+                <AdminSignup />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/dashboard"
+            element={
+              <ProtectedRoute authPath="/admin/login">
+                <AdminDashboard />
+              </ProtectedRoute>
+            }
+          />
 
-        {/* User */}
-        <Route path="/user/login" element Component={UserLogin} />
-        <Route path="/user/signup" element Component={UserSignup} />
-        <Route path="/user/upload" element Component={UserUpload} />
-      </Routes>
+          {/* User */}
+          <Route
+            path="/user/login"
+            element={
+              <ProtectedRoute
+                isAuthPath
+                authPath="/user/login"
+                moveTo="/user/upload"
+              >
+                <UserLogin />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/user/signup"
+            element={
+              <ProtectedRoute
+                isAuthPath
+                authPath="/user/signup"
+                moveTo="/user/upload"
+              >
+                <UserSignup />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/user/upload"
+            element={
+              <ProtectedRoute authPath="/user/login">
+                <UserUpload />
+              </ProtectedRoute>
+            }
+          />
+        </Routes>
+      </main>
       <Footer />
     </ThemeProvider>
   );

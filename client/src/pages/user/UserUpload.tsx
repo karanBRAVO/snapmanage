@@ -1,8 +1,13 @@
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import ImgDialog from '@/components/img-dialog';
+import { toast } from '@/components/hooks/use-toast';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 const UserUpload = () => {
+  const navigate = useNavigate();
+
   const [file, setFile] = useState<null | File>(null);
   const [currentDate, setCurrentDate] = useState(new Date().toLocaleString());
 
@@ -12,9 +17,73 @@ const UserUpload = () => {
     }
   };
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    const token = localStorage.getItem('token');
+    if (!token) {
+      toast({
+        title: 'Error',
+        description: (
+          <div>
+            <span>Not logged in.</span>
+          </div>
+        ),
+      });
+      navigate('/user/login');
+      return;
+    }
+
+    if (!file) {
+      toast({
+        title: 'Error',
+        description: (
+          <div>
+            <span>No image selected</span>
+          </div>
+        ),
+      });
+      return;
+    }
+
     console.log('File submitted:', file);
+    try {
+      const formData = new FormData();
+      formData.append('image', file);
+
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_URL}/api/user/upload-image`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        toast({
+          title: 'Success',
+          description: (
+            <div>
+              <span>Image uploading done.</span>
+            </div>
+          ),
+        });
+        setFile(null);
+      }
+    } catch (err: any) {
+      console.log(err);
+      if (err.response) {
+        toast({
+          title: 'Error',
+          description: (
+            <div>
+              <span>{err.response.data.message}</span>
+            </div>
+          ),
+        });
+      }
+    }
   };
 
   useEffect(() => {
@@ -52,9 +121,9 @@ const UserUpload = () => {
               >
                 <path
                   stroke="currentColor"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
                   d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"
                 />
               </svg>

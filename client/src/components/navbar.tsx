@@ -1,6 +1,11 @@
 import { useNavigate } from 'react-router-dom';
-import ModeToggle from './mode-toggle';
-import UserAvatar from './user-avatar';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Button } from './ui/button';
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -8,7 +13,7 @@ const Navbar = () => {
   return (
     <nav className="flex items-center justify-between p-4 md:px-8 lg:px-16 border-b-2 dark:border-white border-black">
       <div
-        className="flex items-center gap-1 sm:gap-2 flex-col sm:flex-row justify-center"
+        className="flex items-center gap-1 sm:gap-2 flex-col sm:flex-row justify-center cursor-pointer"
         onClick={() => {
           navigate('/');
         }}
@@ -27,8 +32,29 @@ const Navbar = () => {
       </div>
 
       <div className="flex items-center space-x-6">
-        <UserAvatar src="" alt="KY" />
-        <ModeToggle />
+        {localStorage.getItem('token') && localStorage.getItem('name') && (
+          <>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant={'link'}>
+                  {localStorage.getItem('name')}
+                  <span className="sr-only">Avatar</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem
+                  onClick={() => {
+                    localStorage.removeItem('name');
+                    localStorage.removeItem('token');
+                    navigate('/');
+                  }}
+                >
+                  Logout
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </>
+        )}
       </div>
     </nav>
   );

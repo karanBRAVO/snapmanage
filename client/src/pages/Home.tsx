@@ -28,7 +28,7 @@ const Home = () => {
       actions: [
         {
           text: 'Upload',
-          action: () => navigate('/user/login'),
+          action: () => navigate('/user/upload'),
         },
       ],
       content: (

@@ -3,8 +3,8 @@ import { Toaster } from '@/components/ui/toaster';
 import Home from '@/pages/Home';
 import AdminLogin from '@/pages/admin/AdminLogin';
 import AdminSignup from '@/pages/admin/AdminSignup';
-import UserLogin from '@/pages/user/UserLogin';
-import UserSignup from '@/pages/user/UserSignup';
+// import UserLogin from '@/pages/user/UserLogin';
+// import UserSignup from '@/pages/user/UserSignup';
 import { ThemeProvider } from '@/components/theme-provider';
 import Navbar from '@/components/navbar';
 import AdminDashboard from '@/pages/admin/AdminDashboard';
@@ -56,7 +56,7 @@ const App = () => {
           />
 
           {/* User */}
-          <Route
+          {/* <Route
             path="/user/login"
             element={
               <ProtectedRoute
@@ -79,13 +79,13 @@ const App = () => {
                 <UserSignup />
               </ProtectedRoute>
             }
-          />
+          /> */}
           <Route
             path="/user/upload"
             element={
-              <ProtectedRoute authPath="/user/login">
-                <UserUpload />
-              </ProtectedRoute>
+              // <ProtectedRoute authPath="/user/login">
+              <UserUpload />
+              // </ProtectedRoute>
             }
           />
         </Routes>

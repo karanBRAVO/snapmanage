@@ -51,11 +51,11 @@ export type Payment = {
   name: string;
   fatherName: string;
   phoneNumber: string;
-  email: string;
-  dob: string;
+  // email: string;
+  // dob: string;
 };
 
-export const columns: ColumnDef<Payment>[] = [
+const columns: ColumnDef<Payment>[] = [
   {
     accessorKey: 'username',
     header: 'Username',
@@ -82,16 +82,16 @@ export const columns: ColumnDef<Payment>[] = [
       <div className="capitalize">{row.getValue('phoneNumber')}</div>
     ),
   },
-  {
-    accessorKey: 'email',
-    header: 'Email',
-    cell: ({ row }) => <div className="lowercase">{row.getValue('email')}</div>,
-  },
-  {
-    accessorKey: 'dob',
-    header: 'Date of Birth',
-    cell: ({ row }) => <div>{format(row.getValue('dob'), 'PPP')}</div>,
-  },
+  // {
+  //   accessorKey: 'email',
+  //   header: 'Email',
+  //   cell: ({ row }) => <div className="lowercase">{row.getValue('email')}</div>,
+  // },
+  // {
+  //   accessorKey: 'dob',
+  //   header: 'Date of Birth',
+  //   cell: ({ row }) => <div>{format(row.getValue('dob'), 'PPP')}</div>,
+  // },
 ];
 
 export interface IStats {
@@ -248,12 +248,12 @@ const AdminDashboard = () => {
         <>
           <div className="flex items-center py-4 space-x-1">
             <Input
-              placeholder="Filter emails..."
+              placeholder="Filter name..."
               value={
-                (table.getColumn('email')?.getFilterValue() as string) ?? ''
+                (table.getColumn('name')?.getFilterValue() as string) ?? ''
               }
               onChange={(event) =>
-                table.getColumn('email')?.setFilterValue(event.target.value)
+                table.getColumn('name')?.setFilterValue(event.target.value)
               }
               className="max-w-sm"
             />

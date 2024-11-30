@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Button } from '@/components/ui/button';
-import ImgDialog from '@/components/img-dialog';
+import UserAuth from '@/components/user-auth';
 import { toast } from '@/components/hooks/use-toast';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
@@ -8,56 +7,84 @@ import { useNavigate } from 'react-router-dom';
 const UserUpload = () => {
   const navigate = useNavigate();
 
-  const [file, setFile] = useState<null | File>(null);
   const [currentDate, setCurrentDate] = useState(new Date().toLocaleString());
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files) {
-      setFile(event.target.files[0]);
-    }
-  };
+  const onSubmit = async (data: {
+    name: string;
+    username: string;
+    phone: string;
+    fatherName: string;
+    file: File | null;
+  }) => {
+    const { username, name, phone, fatherName, file } = data;
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const token = localStorage.getItem('token');
-    if (!token) {
+    if (!username) {
       toast({
         title: 'Error',
         description: (
           <div>
-            <span>Not logged in.</span>
+            <span>Please provide the your username</span>
           </div>
         ),
       });
-      navigate('/user/login');
       return;
     }
-
+    if (!name) {
+      toast({
+        title: 'Error',
+        description: (
+          <div>
+            <span>Please provide the name</span>
+          </div>
+        ),
+      });
+      return;
+    }
+    if (!phone) {
+      toast({
+        title: 'Error',
+        description: (
+          <div>
+            <span>Please provide the phone number</span>
+          </div>
+        ),
+      });
+      return;
+    }
+    if (!fatherName) {
+      toast({
+        title: 'Error',
+        description: (
+          <div>
+            <span>Please provide the father's name</span>
+          </div>
+        ),
+      });
+      return;
+    }
     if (!file) {
       toast({
         title: 'Error',
         description: (
           <div>
-            <span>No image selected</span>
+            <span>Please provide slip</span>
           </div>
         ),
       });
       return;
     }
 
-    console.log('File submitted:', file);
     try {
       const formData = new FormData();
       formData.append('image', file);
+      formData.append('username', username);
+      formData.append('name', name);
+      formData.append('fatherName', fatherName);
+      formData.append('phone', phone);
 
       const response = await axios.post(
         `${import.meta.env.VITE_API_URL}/api/user/upload-image`,
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+        formData
       );
 
       if (response.status === 200) {
@@ -65,14 +92,16 @@ const UserUpload = () => {
           title: 'Success',
           description: (
             <div>
-              <span>Image uploading done.</span>
+              <span>Uploaded successfully.</span>
             </div>
           ),
         });
-        setFile(null);
+
+        navigate('/');
       }
+      // eslint-disable-next-line
     } catch (err: any) {
-      console.log(err);
+      console.error(err);
       if (err.response) {
         toast({
           title: 'Error',
@@ -85,6 +114,56 @@ const UserUpload = () => {
       }
     }
   };
+
+  // const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+  //   event.preventDefault();
+  //   if (!file) {
+  //     toast({
+  //       title: 'Error',
+  //       description: (
+  //         <div>
+  //           <span>No image selected</span>
+  //         </div>
+  //       ),
+  //     });
+  //     return;
+  //   }
+
+  //   console.log('File submitted:', file);
+  //   try {
+  //     const formData = new FormData();
+  //     formData.append('image', file);
+
+  //     const response = await axios.post(
+  //       `${import.meta.env.VITE_API_URL}/api/user/upload-image`,
+  //       formData
+  //     );
+
+  //     if (response.status === 200) {
+  //       toast({
+  //         title: 'Success',
+  //         description: (
+  //           <div>
+  //             <span>Image uploading done.</span>
+  //           </div>
+  //         ),
+  //       });
+  //       setFile(null);
+  //     }
+  //   } catch (err: any) {
+  //     console.log(err);
+  //     if (err.response) {
+  //       toast({
+  //         title: 'Error',
+  //         description: (
+  //           <div>
+  //             <span>{err.response.data.message}</span>
+  //           </div>
+  //         ),
+  //       });
+  //     }
+  //   }
+  // };
 
   useEffect(() => {
     const intervalId = setInterval(() => {
@@ -102,66 +181,7 @@ const UserUpload = () => {
         Upload your transaction Status
       </h2>
       <p className="text-black dark:text-zinc-400 text-sm">{currentDate}</p>
-      <form
-        onSubmit={(e) => handleSubmit(e)}
-        className="mt-3 flex flex-col items-center justify-center gap-3"
-      >
-        <div className="flex items-center justify-center w-full max-w-md">
-          <label
-            htmlFor="dropzone-file"
-            className="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-gray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500"
-          >
-            <div className="flex flex-col items-center justify-center pt-5 pb-6">
-              <svg
-                className="w-8 h-8 mb-4 text-gray-500 dark:text-gray-400"
-                aria-hidden="true"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 20 16"
-              >
-                <path
-                  stroke="currentColor"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"
-                />
-              </svg>
-              <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
-                <span className="font-semibold">Click to upload</span> or drag
-                and drop
-              </p>
-              <p className="text-xs text-gray-500 dark:text-gray-400">
-                SVG, PNG, JPG or GIF (MAX. 800x400px)
-              </p>
-            </div>
-            <input
-              id="dropzone-file"
-              type="file"
-              className="hidden"
-              accept="image/*"
-              onChange={handleFileChange}
-            />
-          </label>
-        </div>
-        {file ? (
-          <div className="flex flex-row items-center gap-3">
-            <ImgDialog src={URL.createObjectURL(file)}>
-              <img
-                src={URL.createObjectURL(file)}
-                alt="UP"
-                width={100}
-                height={100}
-                loading="lazy"
-                className="w-[200px] h-[200px] object-contain"
-              />
-            </ImgDialog>
-            <Button>Upload</Button>
-          </div>
-        ) : (
-          <p className="text-black dark:text-zinc-500">No image selected</p>
-        )}
-      </form>
+      <UserAuth onSubmit={onSubmit} />
     </div>
   );
 };

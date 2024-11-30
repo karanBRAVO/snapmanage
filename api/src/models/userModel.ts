@@ -17,27 +17,27 @@ const userSchema = new mongoose.Schema(
       required: [true, "User phone number is required"],
       trim: true,
     },
-    email: {
-      type: String,
-      required: [true, "User email is required"],
-      trim: true,
-    },
-    dob: {
-      type: String,
-      required: [true, "User dob is required"],
-      trim: true,
-    },
+    // email: {
+    //   type: String,
+    //   required: [true, "User email is required"],
+    //   trim: true,
+    // },
+    // dob: {
+    //   type: String,
+    //   required: [true, "User dob is required"],
+    //   trim: true,
+    // },
     username: {
       type: String,
       required: [true, "User username is required"],
       unique: true,
       trim: true,
     },
-    password: {
-      type: String,
-      required: [true, "User password is required"],
-      trim: true,
-    },
+    // password: {
+    //   type: String,
+    //   required: [true, "User password is required"],
+    //   trim: true,
+    // },
   },
   { timestamps: true }
 );

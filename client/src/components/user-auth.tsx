@@ -1,9 +1,8 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { cn } from '@/lib/utils';
 import parsePhoneNumber from 'libphonenumber-js';
-
+import ImgDialog from '@/components/img-dialog';
 import {
   Form,
   FormControl,
@@ -14,23 +13,25 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from './ui/input';
-import { format } from 'date-fns';
-import { CalendarIcon } from 'lucide-react';
+// import { format } from 'date-fns';
+// import { CalendarIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Calendar } from '@/components/ui/calendar';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
+// import { Calendar } from '@/components/ui/calendar';
+// import {
+//   Popover,
+//   PopoverContent,
+//   PopoverTrigger,
+// } from '@/components/ui/popover';
+import { useState } from 'react';
+// import { useNavigate } from 'react-router-dom';
 
 export const UserAuthFormSchema = z.object({
   username: z.string().min(2, {
     message: 'Username must be at least 4 characters.',
   }),
-  password: z.string().min(8, {
-    message: 'Password must be at least 8 characters.',
-  }),
+  // password: z.string().min(8, {
+  //   message: 'Password must be at least 8 characters.',
+  // }),
   name: z.string().min(2, {
     message: 'Name must be at least 2 characters',
   }),
@@ -50,29 +51,55 @@ export const UserAuthFormSchema = z.object({
     }
     return phoneNumber.formatInternational();
   }),
-  email: z.string().email({
-    message: 'Inavlid email address',
-  }),
-  dob: z.date({
-    required_error: 'A date of birth is required.',
-  }),
+  // email: z.string().email({
+  //   message: 'Inavlid email address',
+  // }),
+  // dob: z.date({
+  //   required_error: 'A date of birth is required.',
+  // }),
 });
 
-const UserAuth = ({ onSubmit }: { onSubmit: (data: any) => void }) => {
+const UserAuth = ({
+  onSubmit,
+}: {
+  onSubmit: (data: {
+    name: string;
+    fatherName: string;
+    phone: string;
+    username: string;
+    file: File | null;
+  }) => Promise<void>;
+}) => {
   const form = useForm<z.infer<typeof UserAuthFormSchema>>({
     resolver: zodResolver(UserAuthFormSchema),
     defaultValues: {
       username: '',
-      password: '',
+      // password: '',
       name: '',
       fatherName: '',
       phone: '',
     },
   });
 
+  const [file, setFile] = useState<null | File>(null);
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files) {
+      setFile(event.target.files[0]);
+    }
+  };
+
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="w-2/3 space-y-6">
+      <form
+        onSubmit={form.handleSubmit(async (data) => {
+          setSubmitting(true);
+          await onSubmit({ ...data, file });
+          setSubmitting(false);
+        })}
+        className="w-2/3 space-y-6"
+      >
         <FormField
           control={form.control}
           name="name"
@@ -113,7 +140,7 @@ const UserAuth = ({ onSubmit }: { onSubmit: (data: any) => void }) => {
             </FormItem>
           )}
         />
-        <FormField
+        {/* <FormField
           control={form.control}
           name="email"
           render={({ field }) => (
@@ -132,7 +159,7 @@ const UserAuth = ({ onSubmit }: { onSubmit: (data: any) => void }) => {
               <FormMessage />
             </FormItem>
           )}
-        />
+        /> */}
         <FormField
           control={form.control}
           name="phone"
@@ -168,12 +195,14 @@ const UserAuth = ({ onSubmit }: { onSubmit: (data: any) => void }) => {
                   {...field}
                 />
               </FormControl>
-              <FormDescription>Your username here</FormDescription>
+              <FormDescription>
+                Your username here as given by your instructor
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
         />
-        <FormField
+        {/* <FormField
           control={form.control}
           name="password"
           render={({ field }) => (
@@ -192,8 +221,8 @@ const UserAuth = ({ onSubmit }: { onSubmit: (data: any) => void }) => {
               <FormMessage />
             </FormItem>
           )}
-        />
-        <FormField
+        /> */}
+        {/* <FormField
           control={form.control}
           name="dob"
           render={({ field }) => (
@@ -236,10 +265,67 @@ const UserAuth = ({ onSubmit }: { onSubmit: (data: any) => void }) => {
               <FormMessage />
             </FormItem>
           )}
-        />
+        /> */}
+        <label
+          htmlFor="dropzone-file"
+          className="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-gray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500"
+        >
+          <div className="flex flex-col items-center justify-center pt-5 pb-6">
+            <svg
+              className="w-8 h-8 mb-4 text-gray-500 dark:text-gray-400"
+              aria-hidden="true"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 20 16"
+            >
+              <path
+                stroke="currentColor"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"
+              />
+            </svg>
+            <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
+              <span className="font-semibold">Click to upload</span> or drag and
+              drop
+            </p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              SVG, PNG, JPG or GIF (MAX. 800x400px)
+            </p>
+          </div>
+          <input
+            id="dropzone-file"
+            type="file"
+            className="hidden"
+            accept="image/*"
+            onChange={handleFileChange}
+          />
+        </label>
+        {file ? (
+          <div className="flex flex-row items-center gap-3">
+            <ImgDialog src={URL.createObjectURL(file)}>
+              <img
+                src={URL.createObjectURL(file)}
+                alt="UP"
+                width={100}
+                height={100}
+                loading="lazy"
+                className="w-[200px] h-[200px] object-contain"
+              />
+            </ImgDialog>
+            {/* <Button>Upload</Button> */}
+          </div>
+        ) : (
+          <p className="text-black dark:text-zinc-500">No image selected</p>
+        )}
         <div className="w-full flex items-center justify-center">
-          <Button type="submit" className="w-full max-w-md">
-            Submit
+          <Button
+            type="submit"
+            disabled={submitting}
+            className="w-full max-w-md disabled:bg-zinc-400"
+          >
+            {submitting ? 'Submitting...' : 'Submit'}
           </Button>
         </div>
       </form>

@@ -101,7 +101,7 @@ export const getUserDetails = async (req: Request, res: Response) => {
     }
 
     const users = await UserModel.find({}).select(
-      "_id name fatherName phoneNumber email dob username"
+      "_id name fatherName phoneNumber username"
     );
 
     return res.status(200).json({ message: "Users details sent", data: users });

@@ -14,12 +14,12 @@ const UserSignup = () => {
         `${import.meta.env.VITE_API_URL}/api/user/signup`,
         {
           name: data.name,
-          dob: data.dob,
-          email: data.email,
+          // dob: data.dob,
+          // email: data.email,
           fatherName: data.fatherName,
           phoneNumber: data.phone,
           username: data.username,
-          password: data.password,
+          // password: data.password,
         }
       );
 
@@ -34,6 +34,7 @@ const UserSignup = () => {
         });
         navigate('/user/login');
       }
+      // eslint-disable-next-line
     } catch (err: any) {
       console.log(err);
       if (err.response) {
